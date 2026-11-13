@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Türkmenistanyň Taryhy we Zyýarat Ýerleri | Tourist & Pilgrim Heritage Map</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕌</text></svg>">
+</head>
+<body>
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo-icon">
+        <!-- Minaret / Dome Icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <circle cx="12" cy="12" r="4"/>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1 id="headerMainTitle">
+          Türkmenistanyň Taryhy we Zyýarat Ýerleri
+          <span class="badge">Ýüpek Ýoly</span>
+        </h1>
+        <p id="headerSubtitle">Syýahatçylar we zyýaratçylar üçin interaktiw gollanma we karta</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Quick counter stat -->
+      <div class="header-stat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span id="siteCountStat">12 ýer</span>
+      </div>
+
+      <!-- Language selector switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="tk">TK</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ru">RU</button>
+      </div>
+
+      <!-- Mobile drawer toggle -->
+      <button class="toggle-sidebar-mobile" id="mobileSidebarToggle" title="Sanawy aç/ýap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN APP BODY ================= -->
+  <main class="app-container">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="app-sidebar" id="appSidebar">
+      <!-- Mobile sidebar top header with title and close button -->
+      <div class="sidebar-mobile-header" id="sidebarMobileHeader">
+        <div class="mobile-drag-handle"></div>
+        <div class="sidebar-mobile-header-content">
+          <span class="sidebar-mobile-title" id="sidebarMobileTitle">Türkmenistan Mirasy</span>
+          <button class="sidebar-mobile-close-btn" id="sidebarMobileCloseBtn" aria-label="Ýap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- TAB NAVIGATION -->
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="sites" id="tabSitesBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span id="tabSitesLabel">Ýerleriň Sanawy</span>
+        </button>
+
+        <button class="tab-btn" data-tab="routes" id="tabRoutesBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span id="tabRoutesLabel">Taýyn Marşrutlar</span>
+        </button>
+
+        <button class="tab-btn" data-tab="favorites" id="tabFavoritesBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span id="tabFavoritesLabel">Halananlar</span>
+        </button>
+      </div>
+
+      <!-- SEARCH & FILTER TOOLBAR (For Sites Tab) -->
+      <div class="sidebar-search-filters" id="searchFiltersContainer">
+        <!-- Search input box -->
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="siteSearchInput" class="search-input" placeholder="Gözleg...">
+          <button class="clear-search-btn" id="clearSearchBtn" title="Arassala">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Province filter & Reset -->
+        <div class="filter-row">
+          <select id="provinceFilterSelect" class="filter-select">
+            <option value="all">Ähli Welaýatlar</option>
+            <option value="ahal">Ahal & Aşgabat</option>
+            <option value="mary">Mary welaýaty</option>
+            <option value="dashoguz">Daşoguz welaýaty</option>
+            <option value="balkan">Balkan welaýaty</option>
+            <option value="lebap">Lebap welaýaty</option>
+          </select>
+
+          <button class="reset-filters-btn" id="resetFiltersBtn" title="Filtrleri arassala">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Category pills horizontal scroll -->
+        <div class="category-badges-scroll" id="categoryPillsContainer">
+          <button class="cat-pill active" data-category="all">Ähli</button>
+          <button class="cat-pill" data-category="unesco">ÝUNESKO</button>
+          <button class="cat-pill" data-category="shrine">Zyýarathana</button>
+          <button class="cat-pill" data-category="mausoleum">Mawzoleý</button>
+          <button class="cat-pill" data-category="fortress">Gala</button>
+          <button class="cat-pill" data-category="caravanserai">Kerwensaraý</button>
+          <button class="cat-pill" data-category="natural">Tebigy</button>
+        </div>
+      </div>
+
+      <!-- DYNAMIC ITEMS LIST VIEWPORT -->
+      <div class="sidebar-content-area" id="sidebarContentList">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </aside>
+
+    <!-- RIGHT INTERACTIVE MAP CONTAINER -->
+    <div class="map-wrapper">
+      <div id="map"></div>
+
+      <!-- Floating Mobile Pill to toggle list on map view -->
+      <button class="mobile-floating-list-btn" id="mobileFloatingListBtn" aria-label="Sanawy görkez">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span id="mobileFloatingListLabel">Sanawy görkez (20)</span>
+      </button>
+
+      <!-- Map Floating Controls (Layers & Legend) -->
+      <div class="map-floating-controls">
+        <!-- Layer Switcher -->
+        <div class="map-layer-selector">
+          <button class="layer-btn active" data-layer="google_streets" id="layerGoogleBtn">Google Karta</button>
+          <button class="layer-btn" data-layer="google_hybrid" id="layerSatelliteBtn">Google Hemra</button>
+          <button class="layer-btn" data-layer="google_terrain" id="layerTerrainBtn">Google Releýf</button>
+          <button class="layer-btn" data-layer="yandex" id="layerYandexBtn">Yandex</button>
+        </div>
+
+        <!-- Map Legend (Collapsible on mobile) -->
+        <div class="map-legend" id="mapLegend">
+          <div class="legend-header-toggle" id="legendHeaderToggle">
+            <div class="legend-title" id="legendHeading">Kategoriýalar</div>
+            <button class="legend-collapse-btn" id="legendCollapseBtn" aria-label="Kategoriýalary aç/ýap">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="legend-items" id="legendItemsList">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#d4a373;"></div>
+              <span id="legUnesco">ÝUNESKO Mirasy</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#0e8388;"></div>
+              <span id="legShrine">Mukaddes Zyýarathana</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#3a86ff;"></div>
+              <span id="legMausoleum">Mawzoleý & Metjit</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#c2593f;"></div>
+              <span id="legFortress">Gala & Şäher</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#2a9d8f;"></div>
+              <span id="legNatural">Tebigy Täsinlik</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= SITE DETAIL MODAL / DRAWER ================= -->
+  <div class="modal-overlay" id="siteDetailModal">
+    <div class="modal-container" role="dialog" aria-modal="true">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Ýap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Photo carousel banner -->
+      <div class="modal-gallery-wrap">
+        <img src="" alt="" id="modalImg" class="modal-main-img">
+        <div class="gallery-counter-badge" id="galleryCounterBadge">1 / 3</div>
+        <button class="gallery-nav-btn gallery-prev" id="galleryPrevBtn" title="Öňki surat">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="gallery-nav-btn gallery-next" id="galleryNextBtn" title="Indiki surat">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <div class="gallery-dots" id="galleryDots"></div>
+
+        <div class="modal-header-overlay">
+          <h2 class="modal-title" id="modalTitle">Site Title</h2>
+          <div class="modal-badges" id="modalBadges"></div>
+        </div>
+      </div>
+
+      <!-- Detail body -->
+      <div class="modal-body">
+        
+        <!-- Metadata grid -->
+        <div class="modal-meta-grid">
+          <div class="meta-box">
+            <span class="meta-label" id="modalEraLabel">Taryhy Döwri</span>
+            <span class="meta-value" id="modalEraValue">XI asyr</span>
+          </div>
+          <div class="meta-box">
+            <span class="meta-label" id="modalProvinceLabel">Welaýaty</span>
+            <span class="meta-value" id="modalProvinceValue">Ahal welaýaty</span>
+          </div>
+          <div class="meta-box">
+            <span class="meta-label" id="modalCategoryLabel">Kategoriýasy</span>
+            <span class="meta-value" id="modalCategoryValue">Mukaddes Zyýarathana</span>
+          </div>
+        </div>
+
+        <!-- Full historical story & description -->
+        <div>
+          <h3 class="modal-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            <span id="modalHistoryHeading">Taryhy we rowaýaty</span>
+          </h3>
+          <p class="modal-desc-text" id="modalFullDescription"></p>
+        </div>
+
+        <!-- Visiting tips callout -->
+        <div class="tips-callout">
+          <h4 style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span id="modalTipsHeading">Syýahatçylar üçin amaly maslahatlar:</span>
+          </h4>
+          <p id="modalVisitingTipsText"></p>
+        </div>
+
+        <!-- Dress code & etiquette callout -->
+        <div class="dress-callout">
+          <h4 style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+            </svg>
+            <span id="modalDressHeading">Lybasa we zyýarata degişli talaplar:</span>
+          </h4>
+          <p id="modalDressCodeText"></p>
+        </div>
+
+      </div>
+
+      <!-- Action footer -->
+      <div class="modal-footer">
+        <div class="nav-buttons-group">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="modal-nav-google-btn" id="modalGoogleNavBtn" title="Google Navigator (Awtoulagda barmak)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+            <span id="modalGoogleNavLabel">Google Navigator</span>
+          </a>
+
+          <button class="modal-drive-route-btn" id="modalDriveRouteBtn" title="Kartada awtomobil ýoluny çyz">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span id="modalDriveRouteLabel">Ýoluny çyz</span>
+          </button>
+
+          <a href="#" target="_blank" rel="noopener noreferrer" class="modal-nav-yandex-btn" id="modalYandexNavBtn" title="Yandex Navigator">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
+              <circle cx="12" cy="9" r="2.5"></circle>
+            </svg>
+            <span id="modalYandexNavLabel">Yandex Maps</span>
+          </a>
+        </div>
+
+        <div class="modal-aux-actions">
+          <!-- Audio narration reader toggle -->
+          <button class="aux-btn" id="modalAudioBtn" title="Sesi diňle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <span id="modalAudioLabel">Diňle</span>
+          </button>
+
+          <!-- Favorite toggle -->
+          <button class="aux-btn" id="modalFavToggleBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span id="modalFavLabel">Hala</span>
+          </button>
+
+          <!-- Share button -->
+          <button class="aux-btn" id="modalShareBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            <span id="modalShareLabel">Paýlaş</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification banner -->
+  <div class="toast-notice" id="appToast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span id="toastMsgText">Habar</span>
+  </div>
+
+  <!-- ================= MOBILE BOTTOM NAVIGATION ================= -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="bottom-nav-btn active" data-tab="sites" id="bNavSites" title="Ýerleriň sanawy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span id="bNavSitesLabel">Ýerler</span>
+    </button>
+
+    <button class="bottom-nav-btn" data-tab="routes" id="bNavRoutes" title="Awtoulag marşrutlary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      <span id="bNavRoutesLabel">Ýollar</span>
+    </button>
+
+    <button class="bottom-nav-btn" data-tab="favorites" id="bNavFavs" title="Halanan ýerler">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+      <span id="bNavFavsLabel">Halanan</span>
+    </button>
+
+    <button class="bottom-nav-btn" data-action="toggle-map" id="bNavMap" title="Karta dolanmak">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+        <line x1="8" y1="2" x2="8" y2="18"></line>
+        <line x1="16" y1="6" x2="16" y2="22"></line>
+      </svg>
+      <span id="bNavMapLabel">Karta</span>
+    </button>
+  </nav>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- App Data and Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
